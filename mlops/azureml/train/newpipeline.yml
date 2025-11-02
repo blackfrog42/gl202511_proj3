@@ -50,7 +50,8 @@ jobs:
       model_output:
         type: mlflow_model
     sampling_algorithm: random  # Specify the sampling algorithm
-    trial: ./train.yml  # Refers to a separate command component
+    trial: 
+      component: ./train.yml  # Refers to a separate command component
     search_space:
       n_estimators:
         type: choice
