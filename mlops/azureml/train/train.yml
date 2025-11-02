@@ -11,9 +11,9 @@ inputs:
     type: integer  
     default: 100 
   max_depth:
-    type: choice  # Specify the type for max_depth
-    values: [1,3,5,10,None]
-    default: None  # Provide the default value for max_depth
+    type: integer  # Specify the type for max_depth
+    optional: 
+    #default: None  # Provide the default value for max_depth
 outputs:
   model_output:
     type: mlflow_model  # Specify the type for model_output
