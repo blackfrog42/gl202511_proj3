@@ -8,6 +8,9 @@ inputs:
   raw_data:
     type: uri_file
     path: azureml:used-cars-data@latest
+  model_name:
+    type: string
+    default: used-cars-regressor
 
 outputs:
   train_data:
@@ -60,7 +63,7 @@ jobs:
         values: [10, 20, 30]  # Provide the values for max_depth
     objective:
       goal: minimize
-      primary_metric: MSE
+      primary_metric: mse
     limits:
       max_total_trials: 20
       max_concurrent_trials: 10
@@ -74,14 +77,12 @@ jobs:
     command: >-
       python register.py 
       --model_path ${{inputs.model_input}}
+      --model_name ${{inputs.model_name}}
       --model_info_output_path ${{outputs.model_info_output_path}}
     environment: azureml:used-cars-train-env@latest
     inputs:
-      model_input:
-        type: mlflow_model
-        path: ${{parent.jobs.sweep_step.outputs.model_output}}
-      #model_name: "used_cars_price_prediction_model"
-      #model_path: ${{parent.jobs.sweep_step.outputs.model_output}}
+      model_input: ${{parent.jobs.sweep_step.outputs.model_output}}
+      model_name: ${{parent.inputs.model_name}}
     outputs:
       model_info_output_path: ${{parent.outputs.model_info_output_path}}
 

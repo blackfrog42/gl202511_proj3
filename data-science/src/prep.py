@@ -6,7 +6,6 @@ Prepares raw data and provides training and test datasets.
 
 import argparse
 from pathlib import Path
-import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -30,10 +29,10 @@ def main(args):  # Write the function name for the main data preparation logic
     # Reading Data
     df = pd.read_csv(args.raw_data)
 
-    # ------- WRITE YOUR CODE HERE -------
-
-    # Step 1: Perform label encoding to convert categorical features into numerical values for model compatibility.  
-    df = df.apply(LabelEncoder().fit_transform)   # Apply LabelEncoder to all object-type columns in the dataframe
+    categorical_columns = df.select_dtypes(include=["object", "category"]).columns
+    for column in categorical_columns:
+        encoder = LabelEncoder()
+        df[column] = encoder.fit_transform(df[column].astype(str))
 
     # Step 2: Split the dataset into training and testing sets using train_test_split with specified test size and random state.  
     train_df, test_df = train_test_split(df, test_size=args.test_train_ratio, random_state=42)
