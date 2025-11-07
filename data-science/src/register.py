@@ -6,6 +6,7 @@ Registers the best-trained ML model from the sweep job.
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 import mlflow
@@ -38,16 +39,20 @@ def main(args):
     model_info = mlflow.sklearn.log_model(
         sk_model=loaded_model,
         artifact_path="model",
-        registered_model_name=args.model_name,
     )
 
-    registered_version = model_info.registered_model_version
-    if registered_version is None:
-        client = MlflowClient()
-        latest_versions = client.get_latest_versions(name=args.model_name)
-        if not latest_versions:
-            raise RuntimeError(f"Model {args.model_name} failed to register.")
-        registered_version = max(int(version.version) for version in latest_versions)
+    model_uri = model_info.model_uri
+    model_version = mlflow.register_model(model_uri=model_uri, name=args.model_name)
+
+    client = MlflowClient()
+    while model_version.status == "PENDING_REGISTRATION":
+        time.sleep(5)
+        model_version = client.get_model_version(name=args.model_name, version=model_version.version)
+
+    if model_version.status != "READY":
+        raise RuntimeError(f"Model registration failed with status: {model_version.status}")
+
+    registered_version = int(model_version.version)
 
     output_path = Path(args.model_info_output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
