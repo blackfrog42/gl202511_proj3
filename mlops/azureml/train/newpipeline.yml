@@ -8,9 +8,6 @@ inputs:
   raw_data:
     type: uri_file
     path: azureml:used-cars-data@latest
-  model_name:
-    type: string
-    default: used-cars-regressor
 
 outputs:
   train_data:
@@ -76,13 +73,12 @@ jobs:
     code: ../../../data-science/src
     command: >-
       python register.py 
-  --model_path '${{inputs.model_input}}'
-      --model_name ${{inputs.model_name}}
+      --model_path ${{inputs.model_input}}
+      --model_name used-cars-regressor
       --model_info_output_path ${{outputs.model_info_output_path}}
     environment: azureml:used-cars-train-env@latest
     inputs:
       model_input: ${{parent.jobs.sweep_step.outputs.model_output}}
-      model_name: ${{parent.inputs.model_name}}
     outputs:
       model_info_output_path: ${{parent.outputs.model_info_output_path}}
 
